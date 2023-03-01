@@ -1,0 +1,16 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/jaisharma/ws/ariac_ws/install/group5/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_msgs/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_gui/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_gazebo/lib/python3.8/site-packages",
+        "/opt/ros/galactic/lib/python3.8/site-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/jaisharma/ws/ariac_ws/install/group5/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_msgs/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_gui/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_gazebo/lib/python3.8/site-packages",
+        "/opt/ros/galactic/lib/python3.8/site-packages"
+    ]
+}
