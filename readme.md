@@ -30,7 +30,7 @@ Setup ARIAC environment and Group5 codebase
 ```
     cd "your_colcon_workspace"/src
     git clone https://github.com/usnistgov/ARIAC.git
-    git clone git@github.com:jaisharma10/ARIAC-2023.git
+    git clone https://github.com/jaisharma10/ARIAC_2023
     cd ..
     colcon build
     source "your_colcon_workspace"/install/setup.bash
