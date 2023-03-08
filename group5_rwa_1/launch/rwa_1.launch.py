@@ -8,11 +8,11 @@ def generate_launch_description():
     ld = LaunchDescription() # instantiate a Launchdescription object
     
     comp_state_subscriber_node = Node( # declare your Node
-        package="group5", # package name
+        package="group5_rwa1", # package name
         executable="comp_state_subscriber.py" # executable as set in setup.py
     )
     store_order_subscriber_node = Node(
-        package="group5",
+        package="group5_rwa1",
         executable="store_order_subscriber.py"
     )
     

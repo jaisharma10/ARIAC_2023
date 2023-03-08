@@ -10,7 +10,7 @@ from std_msgs.msg import Bool
 from ariac_msgs.msg import Order
 from ariac_msgs.srv import SubmitOrder  
 from ariac_msgs.msg import CompetitionState
-from group5.store_and_submit import OrderClass
+from group5_rwa_1.store_and_submit import OrderClass
 
 class SubmitOrderClient(Node):
     """

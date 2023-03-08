@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>group5</name>
+  <name>group5_rwa_1</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="shubh@todo.todo">shubh</maintainer>
+  <maintainer email="sh.jai104@gmail.com">jaisharma</maintainer>
   <license>TODO: License declaration</license>
-
+  
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
 

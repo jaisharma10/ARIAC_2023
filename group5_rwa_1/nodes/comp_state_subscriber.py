@@ -12,7 +12,7 @@ import rclpy
 from rclpy.node import Node
 from ariac_msgs.msg import CompetitionState
 from std_msgs.msg import Bool
-from group5.competition_client import StartCompClient, EndCompClient
+from group5_rwa_1.competition_client import StartCompClient, EndCompClient
 import time
 
 class CompStateSubscriber(Node):

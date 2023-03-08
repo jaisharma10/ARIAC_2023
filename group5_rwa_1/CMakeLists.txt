@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(group5)
+project(group5_rwa_1)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -27,7 +27,8 @@ install(PROGRAMS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY group5 launch DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY group5_rwa_1 launch DESTINATION share/${PROJECT_NAME})
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
