@@ -23,6 +23,7 @@ Find the latest resources here
   - Installation [Link](https://ariac.readthedocs.io/en/latest/getting_started/installation.html)<br>
 
 
+ 
 ## Build and Compile instructions
 
 Setup ARIAC environment and Group5 codebase
@@ -68,7 +69,7 @@ Start the complete Launch File
 * [Jai Sharma](https://github.com/SaumilShah66)
 * [Varith Punturaumporn](https://github.com/varithpu)
 * [Shubham Takbhate](https://github.com/Shubhamtakbhate1998)
-* Pratik Patel
+* [Pratik Patel](https://github.com/pratik2394)
 
 
 ## Support
