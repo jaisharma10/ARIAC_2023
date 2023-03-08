@@ -19,7 +19,7 @@ Setup ARIAC environment and Group5 RWA 1 codebase.
     cd ..
     colcon build
     source "your_colcon_workspace"/install/setup.bash
-
+```
 
 ## **Running Task Scripts**
 
