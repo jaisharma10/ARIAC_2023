@@ -1,0 +1,24 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/jaisharma/ws/ariac_ws/install/rqt_joint_trajectory_controller/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/lecture7/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/group5_rwa_1/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/competitor_interfaces/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_gui/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_cpp_py/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_msgs/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_gazebo/lib/python3.8/site-packages",
+        "/opt/ros/galactic/lib/python3.8/site-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/jaisharma/ws/ariac_ws/install/rqt_joint_trajectory_controller/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/lecture7/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/group5_rwa_1/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/competitor_interfaces/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_gui/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_cpp_py/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_msgs/lib/python3.8/site-packages",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_gazebo/lib/python3.8/site-packages",
+        "/opt/ros/galactic/lib/python3.8/site-packages"
+    ]
+}

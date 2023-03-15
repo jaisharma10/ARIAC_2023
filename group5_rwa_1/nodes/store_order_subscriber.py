@@ -14,7 +14,7 @@ from group5_rwa_1.store_and_submit import OrderClass
 
 class SubmitOrderClient(Node):
     """
-    Clinet class for submitting order to submit_order service
+    Client class for submitting order to submit_order service
     """
     # initialization
     def __init__(self):

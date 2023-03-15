@@ -4,7 +4,7 @@
   <name>group5_rwa_1</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="sh.jai104@gmail.com">jaisharma</maintainer>
+  <maintainer email="sh.jai104@gmail.com">Jai Sharma</maintainer>
   <license>TODO: License declaration</license>
   
   <buildtool_depend>ament_cmake</buildtool_depend>
