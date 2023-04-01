@@ -80,6 +80,7 @@ class OrderClass():
         self.priority = msg.priority
         if self.type == msg.KITTING:
             self.task = KittingTaskClass(msg.kitting_task)
+            
         elif self.type == msg.ASSEMBLY:
             self.task = AssemblyTaskClass(msg.assembly_task)
         elif self.type == msg.COMBINED:

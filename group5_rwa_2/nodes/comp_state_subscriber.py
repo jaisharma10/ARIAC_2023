@@ -6,17 +6,19 @@ based on msg.competition_state type
 Running in the background [2Hz]
 '''
 
+import time
 import rclpy
 from rclpy.node import Node
-from ariac_msgs.msg import CompetitionState
 from std_msgs.msg import Bool
+from ariac_msgs.msg import CompetitionState
 from group5_rwa_2.competition_client import StartCompClient, EndCompClient
-import time
+
 
 class CompStateSubscriber(Node):
     
     """
-    Competition State Subscriber: This subscribes to two topics, competition_state and the state of the order list. This takes Node as a parent class. 
+    Competition State Subscriber: This subscribes to two topics, competition_state and the state of the order list. 
+    This takes Node as a parent class. 
     
     """
 
@@ -59,6 +61,7 @@ class CompStateSubscriber(Node):
 
         if (msg.competition_state == CompetitionState.ORDER_ANNOUNCEMENTS_DONE and 
             self.submit_state):
+            time.sleep(1)
             end_comp_client = EndCompClient()
             end_comp_client.send_empty_request()
             end_comp_client.destroy_node()

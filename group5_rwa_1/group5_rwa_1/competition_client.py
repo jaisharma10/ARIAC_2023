@@ -14,7 +14,7 @@ class StartCompClient(Node):
     
     '''
     the client instance responds to Trigger service when the topic:
-    '/ariac/start_competition' is called. Request made through
+    '/ariac/start_competition' is listened to. Request made through
     'send_empty_request' method is empty
     '''
 
@@ -28,7 +28,7 @@ class StartCompClient(Node):
 
     def send_empty_request(self):
         self.get_logger().info('Starting Competition')
-        self.get_logger().info(" ---------------------------------------------------- ")
+        self.get_logger().info(" ======================================================================== ")
         self.future = self.cli.call_async(self.req)
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result()
@@ -37,7 +37,7 @@ class EndCompClient(Node):
     
     '''
     the client instance responds to Trigger service when the 
-    topic '/ariac/end_competition' is called. Request made through
+    topic '/ariac/end_competition' is listened to. Request made through
     'send_empty_request' method is empty
     '''
 
@@ -50,7 +50,7 @@ class EndCompClient(Node):
         self.req = Trigger.Request()
 
     def send_empty_request(self):
-        self.get_logger().info(" ---------------------------------------------------- ")
+        self.get_logger().info(" ======================================================================== ")
         self.get_logger().info('Ending Competition')
         self.future = self.cli.call_async(self.req)
         rclpy.spin_until_future_complete(self, self.future)

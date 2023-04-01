@@ -19,7 +19,6 @@ class CompStateSubscriber(Node):
     
     """
     Competition State Subscriber: This subscribes to two topics, competition_state and the state of the order list. This takes Node as a parent class. 
-    
     """
 
     def __init__(self):
@@ -43,7 +42,7 @@ class CompStateSubscriber(Node):
         )
         
         self.subscription_state  # prevent unused variable warnings
-        self.subscription_list  # prevent unused variable warnings
+        self.subscription_list   # prevent unused variable warnings
 
     def competition_state_callback(self, msg:CompetitionState):
         
@@ -61,6 +60,7 @@ class CompStateSubscriber(Node):
 
         if (msg.competition_state == CompetitionState.ORDER_ANNOUNCEMENTS_DONE and 
             self.submit_state):
+            time.sleep(1)
             end_comp_client = EndCompClient()
             end_comp_client.send_empty_request()
             end_comp_client.destroy_node()

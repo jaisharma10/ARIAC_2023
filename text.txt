@@ -1,0 +1,66 @@
+
+KINEMATICS
+- forward/inverse kinematics
+- deegrees of freedom
+- DH Tables
+- Rotation Matrices, Jacobian matrices
+- types of joints: rotary, prismatic, serial. parallel
+- teach programming: manually perform robot task
+- accuracy vs repeatability, bell curve
+    - aim for well calibrated, repeatable robot
+
+PROGRAMMING
+- Online vs Offline Programming
+
+SENSORS
+- force and torque (contact based)
+- vision
+- haptic feedback (medical applications)
+
+MOBILE ROBOTS
+- optimize infrastrucutre:
+    - paint lines, guide wires, rails,reflective beacons, QR Tags, 
+
+CONTROLLERS and CONNECTIONS
+- WiFi, EtherNet, ROS,bus etc.
+- robot controllers
+- wireless and wired protocols are standardized
+- home WiFi is optimized for speed. (high bandwidth)
+- industrial networks mut be REAL TIME
+    - send low data packets, high frequency, low latency
+
+ROS 
+- distributions are alphabetically named!
+
+SOFTWARE DEVELOPMENT
+- source code management
+    - version control, issue tracking, concurrent development
+    - git, github, gitlab, bitbucket
+
+- Continuous Integration (CI)
+    - merge and build source code continuously
+    - build and test code autonomusly
+    - jenkins, travis
+
+- Virtualizationi
+    - virtul machines, emulate system on a faster machines
+    - Docker, VirtualBox, Unix Chroot
+
+- CLoud Computing
+    - run server somewhere on the internet externally
+    - edge computing, fog computing
+    - Container, VM, amazon web services
+
+- Pair Programming
+    - assistants to help programmers
+    - Github CoPilot, OpenAI, Intellicode, IDEs
+
+MANIPULATOR
+- end-effector:
+    - vacuum, clawgrippers
+- tactile sensing to detect textures (fruit picking)
+- grasping decisions are real time 
+- wrist-mounted force sensing
+
+SOFT ROBOTICS
+- air and fluids 

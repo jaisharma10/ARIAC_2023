@@ -2,57 +2,17 @@
 
 import rclpy
 import numpy as np
+import heapq as hq
+import time
 from rclpy.node import Node
-from std_msgs.msg import Bool
-from ariac_msgs.srv import SubmitOrder  
 
-from ariac_msgs.msg import CompetitionState, Order, BinParts, ConveyorParts
+from ariac_msgs.msg import Order, BinParts, ConveyorParts
 
 from group5_rwa_2.store_and_submit import OrderClass
 from group5_rwa_2.part_locations import ConveyerPartsClass, BinPartsClass
-from group5_rwa_2.perform_task import floorRobotClass
+from group5_rwa_2.submit_order_nodes import SubmitOrderClient, SubmitStatePublisher
+from group5_rwa_2.perform_task import FloorRobotClass, CeilingRobotClass
 
-
-class SubmitOrderClient(Node):
-    """
-    Clinet class for submitting order to submit_order service
-    """
-    # initialization
-    def __init__(self):
-        super().__init__('sub_order_client')
-        self.cli = self.create_client(SubmitOrder, '/ariac/submit_order')
-        while not self.cli.wait_for_service(timeout_sec=1.0): 
-            self.get_logger().info('service not available, waiting again...')
-        self.req = SubmitOrder.Request()
-
-    # sent request to ros service
-    def send_request(self, id):
-        self.req.order_id = id
-        self.future = self.cli.call_async(self.req)
-        rclpy.spin_until_future_complete(self, self.future)
-        return self.future.result()
-
-class SubmitStatePublisher(Node):
-    """
-    Publisher class for publishing submission state topic
-    """
-    # initialization
-    def __init__(self, data):
-        super().__init__('submit_state_publisher')
-        self.data = data
-        self.publisher_ = self.create_publisher(Bool, 'submit_state', 10)
-        timer_period = 0.5  # seconds
-        self.timer = self.create_timer(timer_period, self.timer_callback)
-
-    # update topic data
-    def update_data(self, data_update):
-        self.data = data_update
-
-    # callback function for publishing submit_state topic
-    def timer_callback(self):
-        msg = Bool()
-        msg.data = self.data
-        self.publisher_.publish(msg)
 
 class OrderSubscriber(Node):
     """
@@ -61,15 +21,21 @@ class OrderSubscriber(Node):
     # initialization, create all publisher and subscribers
     def __init__(self):
         super().__init__('order_subscriber')
-        self.submitted = False
-        # self.ordersExecuted = False
+     
         self.orders = []
+        hq.heapify(self.orders)           # build a heapq to store incoming orders
         self.order_parts_array = []
+ 
         self.calculated_total_parts = False
         self.bin_parts_received = False
         self.conveyer_parts_received = False
+
+        self.PartColor = dict([(0, "Red"), (1, "Green"),(2,"Blue"),(3,"Orange"),(4,"Purple")])
+        self.PartType = dict([(10, "Battery"), (11, "Pump"),(12,"Sensor"),(13,"Regulator")])
+        self.PartType2 = dict([(0, "Battery"), (1, "Pump"),(2,"Sensor"),(3,"Regulator")])
+
         self.submit_state = False
-        self.submit_state_publisher = SubmitStatePublisher(self.submit_state)
+        self.submit_state_publisher = SubmitStatePublisher(self.submit_state)   
         
         # Subscribe to Bin and Conveyer 
         self.sub_bin_parts = self.create_subscription(
@@ -92,38 +58,57 @@ class OrderSubscriber(Node):
             self.store_order_callback,
             10
         )
-        # subscribe to competition state
-        self.sub_comp_state = self.create_subscription(
-            CompetitionState,
-             "/ariac/competition_state",
-            self.competition_state_callback,
-            2
-        )
+        
+        self.sub_bin_parts
+        self.sub_conveyer_parts
+        self.sub_order
 
-
+    # callback function: store incoming order topics to list of Order objects
+    def store_order_callback(self, msg:Order) -> None:
+        self.calc_total_parts() # must be updated constantly
+        self.get_logger().info("Incoming Order ==> ID: %s " % (msg.id))
+        hq.heappush(self.orders, (0 if msg.priority else 1, OrderClass(msg)))       
+        if self.orders:                                                             # if heapq list is not empty
+            self.pop_order = hq.heappop(self.orders)                                # pop the highest priority order
+            if self.pop_order[1].type == 0:                        # if Kitting Order, check Insufficient Parts Challenge, then perform 
+                self.check_sufficient_order()                                   
+                self.performTask(self.pop_order[1])
+            else:                                                  # else: perform directly
+                self.performTask(self.pop_order[1])                              
+            
     # callback function: identify and store parts in Bins
-    def bin_parts_callback(self, msg:BinParts):
+    def bin_parts_callback(self, msg:BinParts) -> None:
         if self.bin_parts_received == False:
             self.bin_parts = BinPartsClass(msg)
             self.bin_parts_received = True
 
     # callback function: identify and store parts on Conveyor 
-    def conveyer_parts_callback(self, msg:ConveyorParts):
+    def conveyer_parts_callback(self, msg:ConveyorParts) -> None:
         if self.conveyer_parts_received == False:
             self.conveyer_parts = ConveyerPartsClass(msg)
             self.conveyer_parts_received = True
     
-    # callback function: store objects of Incoming Orders
-    def store_order_callback(self, msg:Order):
-        self.get_logger().info("Incoming Order ==> ID: %s || Type: %s" % (msg.id, msg.type))
-        self.orders.append(OrderClass(msg))
-        if msg.type == 0 or msg.type == "0" : # if Kitting Order, check Insufficient Parts Challenge
-            self.check_sufficient_order() 
-                  
     # ============================================================== #
     # |------------| Insufficient Parts Methods |------------| #
     # ============================================================== #
     
+    # helper function: checks if sufficeint parts are present to complete order
+    def check_sufficient_order(self):
+        order_parts = np.zeros((5,4)) # create matrix from storing order-requirements
+        # for part in self.orders[-1].task.parts:
+        for part in self.pop_order[1].task.parts:            
+            order_parts[part.part_color, part.part_type - 10] += 1 
+        self.order_parts_array.append(order_parts)
+        remaining_parts = self.total_parts - order_parts     
+        # outcomes --> 0: part exists || >0: part not needed. part || <0: insufficient parts
+        if np.any(remaining_parts < 0):  
+            self.get_logger().warn("Insufficient parts to complete Kitting Order: ")
+            insufficient_parts = np.where(remaining_parts<0)
+            # report missing parts
+            missing_part_no = np.shape(insufficient_parts)[1]
+            for i in range(missing_part_no):
+                self.get_logger().info("    - missing color %i, type %i" % (insufficient_parts[0][i],  insufficient_parts[1][i]+10))
+        
     # helper function: stores part in Matrix DS
     def calc_total_parts(self):
         if self.calculated_total_parts == False:
@@ -137,42 +122,21 @@ class OrderSubscriber(Node):
                 self.total_parts[part.part.part_color, part.part.part_type - 10] += part.quantity
             self.calculated_total_parts = True
             # print out everything stored in the DS --> Initial Total Parts
-            self.get_logger().info(".......................")
-            self.get_logger().info("Initial Total Parts")
-            self.get_logger().info("color 4, type 11: %i" % (self.total_parts[4,1]))
-            self.get_logger().info("color 2, type 11: %i" % (self.total_parts[2,1]))
-            self.get_logger().info("color 2, type 12: %i" % (self.total_parts[2,2]))
-            self.get_logger().info("color 3, type 13: %i" % (self.total_parts[3,3]))
-            self.get_logger().info("color 3, type 10: %i" % (self.total_parts[3,0]))
-            self.get_logger().info("color 1, type 13: %i" % (self.total_parts[1,3]))
-            self.get_logger().info("color 0, type 12: %i" % (self.total_parts[0,2]))
-            self.get_logger().info(".......................")
-
-    # helper function: checks if sufficeint parts are present to complete order
-    def check_sufficient_order(self):
-        order_parts = np.zeros((5,4)) # create matrix from storing order-requirements
-        for part in self.orders[-1].task.parts:
-            order_parts[part.part_color, part.part_type - 10] += 1 
-        self.order_parts_array.append(order_parts)
-        remaining_parts = self.total_parts - order_parts     
-        # outcomes --> 0: part exists || >0: part not needed. part || <0: insufficient parts
-        if np.any(remaining_parts < 0):  
-            self.get_logger().info(".......................")
-            self.get_logger().info("insufficient parts")
-            insufficient_parts = np.where(remaining_parts<0)
-            # report missing parts
-            missing_part_no = np.shape(insufficient_parts)[1]
-            for i in range(missing_part_no):
-                self.get_logger().info("missing color %i, type %i" % (insufficient_parts[0][i],  insufficient_parts[1][i]+10))
-            self.get_logger().info(".......................")
-        else:
-            # update total parts after deducted from order
-            self.update_total_parts()
+            self.get_logger().info("================================================================================")
+            self.get_logger().info("Initial Available Parts")
+            out_arr=np.argwhere(self.total_parts)
+           
+            for j, k in out_arr:  # using j,k instead of saving new variables to memory
+                str2 = str("Quantity % i" % self.total_parts[j,k] )
+                str1 = ("Color is: % s" % self.PartColor[j] ) + (" ") + ("Type is: % s" % self.PartType2[k]) + (" ") + ("Part % s" % str2)
+                self.get_logger().info(str1)
+                
+            self.get_logger().info("================================================================================")
 
     # helper function: update Avaialble parts List
     def update_total_parts(self):
         self.total_parts = self.total_parts - self.order_parts_array[-1]
-        self.get_logger().info(".......................")
+        self.get_logger().info("..................................")
         self.get_logger().info("Remaining Total Parts")
         self.get_logger().info("color 4, type 11: %i" % (self.total_parts[4,1]))
         self.get_logger().info("color 2, type 11: %i" % (self.total_parts[2,1]))
@@ -181,76 +145,81 @@ class OrderSubscriber(Node):
         self.get_logger().info("color 3, type 10: %i" % (self.total_parts[3,0]))
         self.get_logger().info("color 1, type 13: %i" % (self.total_parts[1,3]))
         self.get_logger().info("color 0, type 12: %i" % (self.total_parts[0,2]))
-        self.get_logger().info(".......................")
+        self.get_logger().info("..................................")
 
     # ============================================== #
-    # |------------| Helper Methods |------------| #
+    # |----------| Perform Task Methods |----------| #
     # ============================================== #
     
-    # def performTask(elf, msg:CompetitionState):
-    #     if msg.competition_state == CompetitionState.ORDER_ANNOUNCEMENTS_DONE:
-    #         self.sort_order()
-    #         self.executeTask([LIST of Orders])
-    #         flag_change
-            
-    # def execiteTask():
-    
-    #  callback function: checks order announcement, sort orders, and submit orders [Make it Dynamic]
-    def competition_state_callback(self, msg:CompetitionState):
-        if self.bin_parts_received == True and self.conveyer_parts_received == True:
-            self.calc_total_parts()
-        if msg.competition_state == CompetitionState.ORDER_ANNOUNCEMENTS_DONE and self.submitted == False:
-            self.get_logger().info("-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x")
-            self.sort_order()
-            self.performTask()
-            self.submit_order()
-            self.submitted = True
-        self.submit_state_publisher.update_data(self.submit_state)
-        rclpy.spin_once(self.submit_state_publisher)
-            
-    def performTask(self):
-        # self.total_parts  --- contains Available Parts
-        # self.orders -- contains tasks to perform
-        self.get_logger().info(" Performing tasks")
-        for order_obj in self.orders:
-            if order_obj.type == 0:
-                self.get_logger().info("================================================")
-                kitting_order = floorRobotClass()
-                # self.get_logger().info("%s" % kitting_order.checkInSPartChallenge())
-                self.get_logger().info("%s" % kitting_order.pickPart(self.conveyer_parts.parts))
-                self.get_logger().info("%s" % kitting_order.placePart())
-                self.get_logger().info("%s" % kitting_order.pickTray())
-                self.get_logger().info("%s" % kitting_order.placeTray())
-                self.get_logger().info("%s" % kitting_order.checkAGVTray())
-                self.get_logger().info("%s" % kitting_order.actionAGV())
-                self.get_logger().info("================================================")
-
-        return None
+    def performTask(self, current_order):
+                
+        order_obj = current_order
+        self.get_logger().info("Executing Order ==> ID: %s " % (order_obj.id))
         
-    # helper function: sort order in terms of priority [convert it to Dynamic Queue]
-    # sort and retain the Order Objects
-    def sort_order(self):
-        # sort order according to priority
-        priorities = []
-        ids = []
-        for i in range(len(self.orders)):
-            priorities.append(self.orders[i].priority)
-            ids.append(self.orders[i].id)
-        sort = np.argsort(np.array(priorities).astype(int))
-        self.ids_sorted = np.array(ids)[sort]
-        self.ids_sorted = list(self.ids_sorted)
-
-    # function which call SubmitOrderClient class to submit orders
-    def submit_order(self):
+        # Execute Kitting Order Task
+        if order_obj.type==0: 
+            self.get_logger().info("  - Working on Kitting Order using Floor Robot")
+            floor_robot=FloorRobotClass()
+            for  p in self.conveyer_parts.parts:
+                TypeofPart=self.PartType[p.part.part_type] +" "
+                ColoroffPart=self.PartColor[p.part.part_color] + " "
+                print("================================================")
+                floor_robot.PickPart(ColoroffPart+TypeofPart,ConvPartCondition=True)
+                print("================================================")
+                floor_robot.PlacePart(ColoroffPart+TypeofPart,bin_slot=(8, 1))
+            print("================================================")
+            floor_robot.ChangeTool("tray")
+            print("================================================")
+            floor_robot.PickTray(order_obj.task.tray_id)
+            # # place tray on AGV
+            print("================================================")
+            floor_robot.PlaceTray(order_obj.task.agv_number)
+            print("================================================")
+            celing_robot=CeilingRobotClass()
+            for bin in self.bin_parts.bins:
+                for c in bin.parts:
+                    TypeofPart=self.PartType[c.part.part_type] +" "
+                    ColoroffPart=self.PartColor[c.part.part_color] +" "
+                    celing_robot=CeilingRobotClass()
+                    celing_robot.PickPart(ColoroffPart+TypeofPart,bin_slot=(8,1))
+                    celing_robot.PlacePart(ColoroffPart+TypeofPart,4)
+                    print('=========================================')
+        
+        # Execute Assembly Order Task     
+        if order_obj.type==1: 
+            self.get_logger().info("  - Working on Assembly Order using Ceiling Robot")
+            celing_robot=CeilingRobotClass()
+            print(order_obj.task.agv_numbers)
+        
+        # Execute Combined Order Task     
+        if order_obj.type==2: 
+            self.get_logger().info("  - Working on Combined Order using Floor and Ceiling Robot")         
+        
+        
+        self.update_total_parts()                           # updates store list for parts
+        self.submit_order(order_obj.id)                     # call function to submit order, send in the ID of ORDER
+        
+    # ============================================== #
+    # |----------| Submit Order Methods |----------| #
+    # ============================================== #
+    
+    # calls the submit order client
+    def submit_order(self, order_id):
         submit_order_client = SubmitOrderClient()
-        while self.ids_sorted:
-            temp_id = self.ids_sorted.pop()
-            response = submit_order_client.send_request(temp_id)
-            self.get_logger().info("Order ID: %s" % temp_id)
-            submit_order_client.get_logger().info(
-            'Response from server %r, %s' %
-            (response.success, response.message))
-        self.submit_state = True
+        self.get_logger().info("Submitting Order ==> ID: %s " % (order_id))
+        response = submit_order_client.send_request(order_id)
+        submit_order_client.get_logger().info('Response from Submit Order server "%r", %s' % (response.success, response.message))
+        self.get_logger().info("================================================================================")
+        self.check_end_comp()
+    
+    # if heapq is empty, the state is published on /submit_state
+    def check_end_comp(self):        
+        if not self.orders:             # if the List is EMPTY
+            self.submit_state = True
+            self.submit_state_publisher.update_data(self.submit_state)
+            rclpy.spin_once(self.submit_state_publisher)
+        else:
+            self.submit_state = False    
 
 # main loop
 def main(args=None):
