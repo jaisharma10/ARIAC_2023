@@ -11,7 +11,8 @@ from ariac_msgs.msg import Order, BinParts, ConveyorParts
 from group5_rwa_2.store_and_submit import OrderClass
 from group5_rwa_2.part_locations import ConveyerPartsClass, BinPartsClass
 from group5_rwa_2.submit_order_nodes import SubmitOrderClient, SubmitStatePublisher
-from group5_rwa_2.perform_task import FloorRobotClass, CeilingRobotClass
+from group5_rwa_2.perform_task import FloorRobotClass, CeilingRobotClassKitting,CeilingRobotClassAssembly
+from group5_rwa_2.agv_apis import ManageAGV
 
 
 class OrderSubscriber(Node):
@@ -102,12 +103,12 @@ class OrderSubscriber(Node):
         remaining_parts = self.total_parts - order_parts     
         # outcomes --> 0: part exists || >0: part not needed. part || <0: insufficient parts
         if np.any(remaining_parts < 0):  
-            self.get_logger().warn("Insufficient parts to complete Kitting Order: ")
+            self.get_logger().warn("Insufficient parts to complete Kitting order")
             insufficient_parts = np.where(remaining_parts<0)
             # report missing parts
             missing_part_no = np.shape(insufficient_parts)[1]
             for i in range(missing_part_no):
-                self.get_logger().info("    - missing color %i, type %i" % (insufficient_parts[0][i],  insufficient_parts[1][i]+10))
+                self.get_logger().info("    - missing color %s, type %s" % (self.PartColor[insufficient_parts[0][i]],  self.PartType[insufficient_parts[1][i]+10]))
         
     # helper function: stores part in Matrix DS
     def calc_total_parts(self):
@@ -121,7 +122,7 @@ class OrderSubscriber(Node):
             for part in self.conveyer_parts.parts:
                 self.total_parts[part.part.part_color, part.part.part_type - 10] += part.quantity
             self.calculated_total_parts = True
-            # print out everything stored in the DS --> Initial Total Parts
+            # self.get_logger().info out everything stored in the DS --> Initial Total Parts
             self.get_logger().info("================================================================================")
             self.get_logger().info("Initial Available Parts")
             out_arr=np.argwhere(self.total_parts)
@@ -136,16 +137,8 @@ class OrderSubscriber(Node):
     # helper function: update Avaialble parts List
     def update_total_parts(self):
         self.total_parts = self.total_parts - self.order_parts_array[-1]
-        self.get_logger().info("..................................")
-        self.get_logger().info("Remaining Total Parts")
-        self.get_logger().info("color 4, type 11: %i" % (self.total_parts[4,1]))
-        self.get_logger().info("color 2, type 11: %i" % (self.total_parts[2,1]))
-        self.get_logger().info("color 2, type 12: %i" % (self.total_parts[2,2]))
-        self.get_logger().info("color 3, type 13: %i" % (self.total_parts[3,3]))
-        self.get_logger().info("color 3, type 10: %i" % (self.total_parts[3,0]))
-        self.get_logger().info("color 1, type 13: %i" % (self.total_parts[1,3]))
-        self.get_logger().info("color 0, type 12: %i" % (self.total_parts[0,2]))
-        self.get_logger().info("..................................")
+       
+
 
     # ============================================== #
     # |----------| Perform Task Methods |----------| #
@@ -158,45 +151,193 @@ class OrderSubscriber(Node):
         
         # Execute Kitting Order Task
         if order_obj.type==0: 
-            self.get_logger().info("  - Working on Kitting Order using Floor Robot")
-            floor_robot=FloorRobotClass()
-            for  p in self.conveyer_parts.parts:
-                TypeofPart=self.PartType[p.part.part_type] +" "
-                ColoroffPart=self.PartColor[p.part.part_color] + " "
-                print("================================================")
-                floor_robot.PickPart(ColoroffPart+TypeofPart,ConvPartCondition=True)
-                print("================================================")
-                floor_robot.PlacePart(ColoroffPart+TypeofPart,bin_slot=(8, 1))
-            print("================================================")
-            floor_robot.ChangeTool("tray")
-            print("================================================")
-            floor_robot.PickTray(order_obj.task.tray_id)
-            # # place tray on AGV
-            print("================================================")
-            floor_robot.PlaceTray(order_obj.task.agv_number)
-            print("================================================")
-            celing_robot=CeilingRobotClass()
-            for bin in self.bin_parts.bins:
-                for c in bin.parts:
-                    TypeofPart=self.PartType[c.part.part_type] +" "
-                    ColoroffPart=self.PartColor[c.part.part_color] +" "
-                    celing_robot=CeilingRobotClass()
-                    celing_robot.PickPart(ColoroffPart+TypeofPart,bin_slot=(8,1))
-                    celing_robot.PlacePart(ColoroffPart+TypeofPart,4)
-                    print('=========================================')
+                self.get_logger().info("================================================")
+
+                floor_robot=FloorRobotClass()
+                for  p in self.conveyer_parts.parts:
+                    
+                    TypeofPart=self.PartType[p.part.part_type] +" "
+                    ColoroffPart=self.PartColor[p.part.part_color] + " "
+                    self.get_logger().info("================================================")
+                    s=floor_robot.PickPart(ColoroffPart+TypeofPart,ConvPartCondition=True)
+                    self.get_logger().info(s)
+                    self.get_logger().info("================================================")
+                    s=floor_robot.PlacePart(ColoroffPart+TypeofPart,bin_slot=(8, 1))
+                    self.get_logger().info(s)
+                self.get_logger().info("================================================")
+                s=floor_robot.ChangeTool("tray")
+                self.get_logger().info(s)
+                self.get_logger().info("================================================")
+                s=floor_robot.PickTray(order_obj.task.tray_id)
+                self.get_logger().info(s)
+                # # place tray on AGV
+                self.get_logger().info("================================================")
+                s=floor_robot.PlaceTray(order_obj.task.agv_number)
+                self.get_logger().info(s)
+                self.get_logger().info("================================================")
+                minimal_client = ManageAGV(order_obj.task.agv_number)
+            
+
+                minimal_client.move_agv_to(order_obj.task.destination)
+                minimal_client.get_logger().info( 'Moving AGV %i to location %i' % (order_obj.task.agv_number, order_obj.task.destination))
+
+                minimal_client.destroy_node()
+                
+                # self.get_logger().info(self.total_parts)
+                celing_robot=CeilingRobotClassKitting()
+                
+                for p in (order_obj.task.parts):
+                    if self.total_parts[p.part_color,p.part_type-10]>0 :
+                      self.total_parts[p.part_color,p.part_type-10]=self.total_parts[p.part_color,p.part_type-10]-1
+                      TypeofPart=self.PartType[p.part_type] +" "
+                      ColoroffPart=self.PartColor[p.part_color] + " "
+                      s=celing_robot.PickPart(ColoroffPart+TypeofPart,bin_slot=(8,1))
+                      self.get_logger().info(s)
+                      self.get_logger().info('=========================================')
+                      s=celing_robot.PlacePart(ColoroffPart+TypeofPart,p.quadrant)
+                      self.get_logger().info(s)
+                      self.get_logger().info('=========================================')
+                    # else:
+                    #   for i in range(0,5):
+                    #     if self.total_parts[i,p.part_type-10]>0:
+                    #         self.total_parts[i,p.part_type-10]=self.total_parts[i,p.part_type-10]-1
+                    #         TypeofPart=self.PartType[p.part_type] +" "
+                    #         ColoroffPart=self.PartColor[i] + " "
+                    #         celing_robot.PickPart(ColoroffPart+TypeofPart,bin_slot=(8,1))
+                    #         self.get_logger().info('=========================================')
+                    #         celing_robot.PlacePart(ColoroffPart+TypeofPart,p.quadrant)
+                    #         self.get_logger().info('=========================================')  
+                    #         break
+                s=celing_robot.LockAgv(order_obj.task.agv_number)
+                self.get_logger().info(s)
+                s=celing_robot.MoveAgv(order_obj.task.agv_number,"warehouse") 
+                self.get_logger().info(s)
+
+                out_arr=np.argwhere(self.total_parts)
+           
+                for j, k in out_arr:  # using j,k instead of saving new variables to memory
+                    str2 = str("Quantity % i" % self.total_parts[j,k] )
+                    str1 = ("Color is: % s" % self.PartColor[j] ) + (" ") + ("Type is: % s" % self.PartType2[k]) + (" ") + ("Part % s" % str2)
+                    self.get_logger().info(str1)
+                                  
         
         # Execute Assembly Order Task     
         if order_obj.type==1: 
             self.get_logger().info("  - Working on Assembly Order using Ceiling Robot")
-            celing_robot=CeilingRobotClass()
-            print(order_obj.task.agv_numbers)
+            celing_robot=CeilingRobotClassAssembly()
+            
+            self.get_logger().info("============================================================")
+  
+            for num in order_obj.task.agv_numbers:
+                            celing_robot.LockAgv(num)
+                            self.get_logger().info("============================================================")
+                            s=celing_robot.MoveAgv(num,order_obj.task.station)
+                            self.get_logger().info(s)
+                            self.get_logger().info("============================================================")
+
+                            minimal_client = ManageAGV(num)
+                            # rclpy.init()
+
+                            minimal_client.move_agv_to(order_obj.task.station)
+                            minimal_client.get_logger().info( 'Moving AGV %i to location %i' % (num, order_obj.task.station))
+                            minimal_client.destroy_node()
+
+                            # rclpy.shutdown()
+            for p in (order_obj.task.parts):
+                    TypeofPart=self.PartType[p.part_type] 
+                    ColoroffPart=self.PartColor[p.part_color] + " "
+                    s=celing_robot.PickPart(ColoroffPart+TypeofPart,"agv1")
+                    self.get_logger().info(s)
+
+                    self.get_logger().info("============================================================")
+                    s=celing_robot.PlacePart(ColoroffPart+TypeofPart,order_obj.task.station)
+                    self.get_logger().info(s)
+                    self.get_logger().info("============================================================")
+   
         
         # Execute Combined Order Task     
         if order_obj.type==2: 
-            self.get_logger().info("  - Working on Combined Order using Floor and Ceiling Robot")         
-        
-        
-        self.update_total_parts()                           # updates store list for parts
+            self.get_logger().info("  - Working on Combined Order using Floor and Ceiling Robot") 
+
+            self.get_logger().info("  - Floor robot will pick up parts from conveyor belt")
+            self.get_logger().info("  - Ceiling robot will pick up parts from bins")
+
+            """
+            Based on station number, the parts needs to be placed on AGV1 or AGV2 or AGV3 or AGV4. 
+
+            If the station number is AS1 or AS2, then any of the free AGV (1 or 2- based on status) can be used to place the parts.
+            likewise if the station number is AS3 or AS4, then any of the free AGV (3 or 4- based on status) can be used to place the parts. 
+
+            For now, instead of querying the status of AGV, we will use AGV1 for AS1 and AS2 and AGV3 for AS3 and AS4. 
+            
+            """
+            
+            if order_obj.task.station == 1 or order_obj.task.station == 2:
+                the_agv_number = 1
+            if order_obj.task.station == 3 or order_obj.task.station == 4:
+                the_agv_number = 3 
+                 
+            
+            floor_robot=FloorRobotClass()
+            celing_robot=CeilingRobotClassKitting()
+            # self.get_logger().info("Total parts:",self.total_parts_update)
+            # out_arr=np.argwhere(self.total_parts)
+            # for j, k in out_arr:  # using j,k instead of saving new variables to memory
+            #     str2 = str("Quantity % i" % self.total_parts[j,k] )
+            #     str1 = ("Color is: % s" % self.PartColor[j] ) + (" ") + ("Type is: % s" % self.PartType2[k]) + (" ") + ("Part % s" % str2)
+            #     self.get_logger().info(str1)
+       
+                
+            self.get_logger().info("================================================")
+            s=floor_robot.ChangeTool("tray")
+            self.get_logger().info(s)
+            self.get_logger().info("================================================")
+            s=floor_robot.PickTray(the_agv_number)
+            self.get_logger().info(s)
+                # # place tray on AGV
+            self.get_logger().info("================================================")
+            s=floor_robot.PlaceTray(the_agv_number)
+            self.get_logger().info(s)
+            self.get_logger().info("================================================")
+            self.i=1
+            for p in (order_obj.task.parts):
+                   
+                    if self.total_parts[p.part_color,p.part_type-10]>0 :
+                      self.total_parts[p.part_color,p.part_type-10]=self.total_parts[p.part_color,p.part_type-10]-1
+                      TypeofPart=self.PartType[p.part_type] +" "
+                      ColoroffPart=self.PartColor[p.part_color] + " "
+                      s=celing_robot.PickPart(ColoroffPart+TypeofPart,bin_slot=(8,1))
+                      self.get_logger().info(s)
+                      self.get_logger().info('=========================================')
+                      s=celing_robot.PlacePart(ColoroffPart+TypeofPart,self.i)
+                      self.get_logger().info(s)
+                      self.get_logger().info('=========================================')
+                      self.i+=1
+          
+
+
+            self.get_logger().info("  - Working on Assembly Part using Ceiling Robot")
+            self.get_logger().info(f'Moving AGV: {the_agv_number} to station: {order_obj.task.station}')
+            self.get_logger().info("============================================================")
+            celing_robot=CeilingRobotClassAssembly()
+            s=celing_robot.LockAgv(the_agv_number)
+            self.get_logger().info(s)
+            self.get_logger().info("============================================================")
+            s= celing_robot.MoveAgv(the_agv_number,order_obj.task.station)
+            self.get_logger().info(s)
+            self.get_logger().info("============================================================")
+            
+            for p in (order_obj.task.parts):
+                    TypeofPart=self.PartType[p.part_type] 
+                    ColoroffPart=self.PartColor[p.part_color] + " "
+                    s=celing_robot.PickPart(ColoroffPart+TypeofPart,"agv1")
+                    self.get_logger().info(s)
+                    self.get_logger().info("============================================================")
+                    s=celing_robot.PlacePart(ColoroffPart+TypeofPart,order_obj.task.station)
+                    self.get_logger().info(s)
+                    self.get_logger().info("============================================================")  
+        # self.update_total_parts()              
+      # updates store list for parts
         self.submit_order(order_obj.id)                     # call function to submit order, send in the ID of ORDER
         
     # ============================================== #
@@ -232,3 +373,19 @@ def main(args=None):
 if __name__ == '__main__':
     main()
     
+
+"""
+def main():
+    rclpy.init()
+
+    minimal_client = MoveAGV()
+    minimal_client.move_agv_to(the_destination)
+
+    minimal_client.destroy_node()
+    rclpy.shutdown()
+
+main()
+
+
+
+"""

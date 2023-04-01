@@ -24,6 +24,7 @@ SCRIPTS_DESTINATION lib/${PROJECT_NAME})
 install(PROGRAMS
   nodes/comp_state_subscriber.py
   nodes/store_order_subscriber.py
+  nodes/agv_management.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
