@@ -37,7 +37,7 @@ Start the complete Launch File
 
 ## Team Members
 
-* [Jai Sharma](https://github.com/jaisharma10/)
+* [Jai Sharma](https://github.com/jaisharma10)
 * [Varith Punturaumporn](https://github.com/varithpu)
 * [Shubham Takbhate](https://github.com/Shubhamtakbhate1998)
 * [Pratik Patel](https://github.com/pratik2394)
