@@ -52,7 +52,6 @@ class CompStateSubscriber(Node):
         This call back function is for starting and ending the competition. 
         It is subscribing to a custom topic (created by us) having simple datatype of boolean. 
         It is supposed flag whether the order list is empty or not. 
-        
         """
 
         if msg.competition_state == CompetitionState.READY:            

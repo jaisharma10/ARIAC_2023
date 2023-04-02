@@ -22,6 +22,7 @@ class ManageAGV(Node):
 
     Service: /ariac/agv{n}_status
              /agv{n}_controller/commands
+             check
 
     """
     # initialization, create all publisher and subscribers
@@ -29,9 +30,6 @@ class ManageAGV(Node):
         super().__init__('agv_mover')
         self.AGV_number = number   
         print(f'/ariac/move_agv{self.AGV_number}')
-        # self.service_client = f'/ariac/move_agv{self.AGV_number}'
-        
-        # self.topic_to_subscribe = f'/ariac/agv{self.AGV_number}_status'
 
         # Subscribe to Bin and Conveyer 
         self.mover_client = self.create_client(MoveAGV, f'/ariac/move_agv{self.AGV_number}')
