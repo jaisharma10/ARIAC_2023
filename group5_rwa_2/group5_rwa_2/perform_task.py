@@ -28,7 +28,6 @@ class FloorRobotClass:
         
 class CeilingRobotClassKitting:
 
-        
     def PickPart(self, part_type, bin_slot):
         return("[CeilingRobot] pick {} from bin {} - slot {}".format(part_type, bin_slot[0], bin_slot[1]))
     
@@ -40,10 +39,9 @@ class CeilingRobotClassKitting:
         
     def MoveAgv(self, agv_id, destination):
         return("move agv {} to {}".format(agv_id, destination))
-class CeilingRobotClassAssembly:
-
-
-        
+    
+class CeilingRobotClassAssembly:      
+      
     def PickPart(self, part_type, agv):
         return("[CeilingRobot] pick {} from agv {} ".format(part_type,agv))
     

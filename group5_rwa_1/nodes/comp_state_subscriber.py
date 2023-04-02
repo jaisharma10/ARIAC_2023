@@ -18,7 +18,7 @@ import time
 class CompStateSubscriber(Node):
     
     """
-    Competition State Subscriber: This subscribes to two topics, competition_state and the state of the order list. This takes Node as a parent class. 
+    Competition State Subscriber: This subscribes to two topics, competition_state and the 'state' of the order list. This takes Node as a parent class. 
     """
 
     def __init__(self):
@@ -50,7 +50,6 @@ class CompStateSubscriber(Node):
         This call back function is for starting and ending the competition. 
         It is subscribing to a custom topic (created by us) having simple datatype of boolean. 
         It is supposed flag whether the order list is empty or not. 
-        
         """
 
         if msg.competition_state == CompetitionState.READY:            

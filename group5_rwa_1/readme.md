@@ -32,12 +32,12 @@ Start the ARIAC environment
 Start the complete Launch File
 
 ```
-  ros2 launch group5 rwa_1.launch.py 
+  ros2 launch group5_rwa_2 rwa_2.launch.py 
 ```
 
 ## Team Members
 
-* [Jai Sharma](https://github.com/SaumilShah66)
+* [Jai Sharma](https://github.com/jaisharma10/)
 * [Varith Punturaumporn](https://github.com/varithpu)
 * [Shubham Takbhate](https://github.com/Shubhamtakbhate1998)
 * [Pratik Patel](https://github.com/pratik2394)

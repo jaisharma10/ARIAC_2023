@@ -27,6 +27,7 @@ class CompStateSubscriber(Node):
         
         subscription_topic_comp_state = "/ariac/competition_state"
         subscription_topic_empty_list = "/submit_state"
+        self.submit_state = False
         
         self.subscription_state = self.create_subscription(
             CompetitionState,
@@ -43,7 +44,7 @@ class CompStateSubscriber(Node):
         )
         
         self.subscription_state  # prevent unused variable warnings
-        self.subscription_list  # prevent unused variable warnings
+        self.subscription_list   # prevent unused variable warnings
 
     def competition_state_callback(self, msg:CompetitionState):
         
@@ -71,7 +72,6 @@ class CompStateSubscriber(Node):
     
 def main(args=None):
     rclpy.init(args=args)
-    time.sleep(1)
     comp_state_subscriber = CompStateSubscriber()
     rclpy.spin(comp_state_subscriber)
     comp_state_subscriber.destroy_node()
