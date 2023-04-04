@@ -71,6 +71,7 @@ class CompStateSubscriber(Node):
     
 def main(args=None):
     rclpy.init(args=args)
+    time.sleep(1)
     comp_state_subscriber = CompStateSubscriber()
     rclpy.spin(comp_state_subscriber)
     comp_state_subscriber.destroy_node()

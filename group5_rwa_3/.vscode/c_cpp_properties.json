@@ -1,0 +1,31 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/jaisharma/ws/ariac_ws/install/test_competitor/include/**",
+        "/home/jaisharma/ws/ariac_ws/install/competitor_interfaces/include/**",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_sensors/include/**",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_plugins/include/**",
+        "/home/jaisharma/ws/ariac_ws/install/ariac_msgs/include/**",
+        "/opt/ros/galactic/include/**",
+        "/home/jaisharma/ws/ariac_ws/src/ARIAC_2023/group5_rwa_1/include/**",
+        "/home/jaisharma/ws/ariac_ws/src/ariac/ariac_plugins/include/**",
+        "/home/jaisharma/ws/ariac_ws/src/ariac/ariac_sensors/include/**",
+        "/home/jaisharma/ws/ariac_ws/src/ariac/test_competitor/include/**",
+        "/home/jaisharma/ws/ariac_ws/src/ariac_cpp_py/include/**",
+        "/home/jaisharma/ws/ariac_ws/src/enpm663_spring2023/lecture7/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

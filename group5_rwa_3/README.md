@@ -1,4 +1,4 @@
-# RWA 2 Submission
+# RWA 3 Submission
 
 Through the assignment, accomplish some important tasks:
 - 'List main features below'
@@ -30,7 +30,7 @@ Start the complete Launch File
   ros2 launch group5_rwa_3 rwa_3.launch.py 
 ```
 
-## Team Members
+## Team Memberss
 
 * [Jai Sharma](https://github.com/jaisharma10/)
 * [Varith Punturaumporn](https://github.com/varithpu)

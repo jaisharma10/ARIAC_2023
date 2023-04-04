@@ -24,11 +24,11 @@ SCRIPTS_DESTINATION lib/${PROJECT_NAME})
 install(PROGRAMS
   nodes/comp_state_subscriber.py
   nodes/store_order_subscriber.py
-  nodes/agv_management.py
+  nodes/tutorial_2.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY group5_rwa_3 launch DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY group5_rwa_3 launch config DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
