@@ -21,13 +21,13 @@ Start the ARIAC environment
 Start the ARIAC environment
 
 ```
-  ros2 launch ariac_gazebo ariac.launch.py trial_name:=rwa3
+  ros2 launch ariac_gazebo ariac.launch.py competitor_pkg:=group5_rwa_3 sensor_config:=group5_sensors trial_name:=rwa3
 ```
 
-Start the complete Launch File
+Start the Sensor Testing Launch File
 
 ```
-  ros2 launch group5_rwa_3 rwa_3.launch.py 
+  ros2 launch group5_rwa_3 rwa_3_task_manager.launch.py 
 ```
 
 ## Team Memberss

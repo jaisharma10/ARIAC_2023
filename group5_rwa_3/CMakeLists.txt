@@ -22,9 +22,10 @@ SCRIPTS_DESTINATION lib/${PROJECT_NAME})
 
 # Install Python executables
 install(PROGRAMS
-  nodes/comp_state_subscriber.py
+  nodes/competition_state_node.py
+  nodes/task_manager_node.py
+  nodes/sensor_node.py
   nodes/store_order_subscriber.py
-  nodes/tutorial_2.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

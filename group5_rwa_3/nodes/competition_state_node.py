@@ -9,6 +9,7 @@ Running in the background [2Hz]
 import time
 import rclpy
 from rclpy.node import Node
+from rclpy.node import Subscription
 from std_msgs.msg import Bool
 from ariac_msgs.msg import CompetitionState
 from group5_rwa_3.competition_client import StartCompClient, EndCompClient
@@ -22,30 +23,33 @@ class CompStateSubscriber(Node):
     
     """
 
+    # initialization, create all subscribers
     def __init__(self):
         super().__init__('comp_state_subscriber')
         
-        subscription_topic_comp_state = "/ariac/competition_state"
-        subscription_topic_empty_list = "/submit_state"
-        self.submit_state = False
+        topic_competition_state = "/ariac/competition_state"
+        topic_empty_list_tracker = "/submit_state"
         
-        self.subscription_state = self.create_subscription(
+        self.subscriber_state: Subscription = self.create_subscription(
             CompetitionState,
-            subscription_topic_comp_state,
+            topic_competition_state,
             self.competition_state_callback,
             2
         )
 
-        self.subscription_list = self.create_subscription(
+        self.subscriber_list: Subscription = self.create_subscription(
             Bool,
-            subscription_topic_empty_list,
+            topic_empty_list_tracker,
             self.empty_list_callback,
             2
         )
         
-        self.subscription_state  # prevent unused variable warnings
-        self.subscription_list   # prevent unused variable warnings
+        self.subscriber_state  # prevent unused variable warnings
+        self.subscriber_list   # prevent unused variable warnings
+        
+        self.submit_state: bool = False
 
+    # callback function: performs task based on Competition State
     def competition_state_callback(self, msg:CompetitionState):
         
         """
@@ -53,12 +57,14 @@ class CompStateSubscriber(Node):
         It is subscribing to a custom topic (created by us) having simple datatype of boolean. 
         It is supposed flag whether the order list is empty or not. 
         """
-
+ 
+        # check if competition can START
         if msg.competition_state == CompetitionState.READY:            
             start_comp_client = StartCompClient()
             start_comp_client.send_empty_request()
             start_comp_client.destroy_node()
 
+        # check if competition can END
         if (msg.competition_state == CompetitionState.ORDER_ANNOUNCEMENTS_DONE and 
             self.submit_state):
             time.sleep(1)
