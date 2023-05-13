@@ -1,0 +1,128 @@
+# Trial Name: rwa4.yaml
+
+# ENVIRONMENT SETUP
+
+time_limit: -1 # options: -1 (no time limit) or number of seconds (max 500)
+
+# kitting_trays: # Which kitting trays will be spawn
+#   tray_ids: [0, 3] 
+#   slots: [4, 1]
+
+# challenges:
+#   - faulty_part:
+#       order_id: 'KITTING1'
+#       quadrant3: true
+
+  
+
+parts:  
+  bins: # bin params - 8 total bins each bin has nine total slots (1-9)
+    bin1:
+      - type: 'battery'
+        color: 'red'
+        slots: [4, 6]
+      - type: 'pump'
+        color: 'green'
+        slots: [1]
+    bin2:
+      - type: 'sensor'
+        color: 'orange'
+        slots: [4, 6]
+    bin5:
+      - type: 'regulator'
+        color: 'purple'
+        slots: [4, 6]
+      - type: 'pump'
+        color: 'red'
+        slots: [1]
+    bin6:
+      - type: 'sensor'
+        color: 'blue'
+        slots: [4, 6]
+  agvs:
+    agv1:
+      tray_id: 1
+      parts:
+        - type: 'pump'
+          color: 'red'
+          quadrant: 1
+          rotation: 'pi'
+    agv2:
+      tray_id: 2
+      parts:
+        - type: 'pump'
+          color: 'purple'
+          quadrant: 1
+          rotation: 'pi/2'
+    agv3:
+      tray_id: 3
+      parts:
+        - type: 'pump'
+          color: 'orange'
+          quadrant: 2
+          rotation: 'pi/3'
+    agv4:
+      tray_id: 4
+      parts:
+        - type: 'pump'
+          color: 'blue'
+          quadrant: 2
+          rotation: '-pi/3'
+orders:
+
+  - id: 'KITTING__1'
+    type: 'kitting'
+    announcement:
+      time_condition: 1
+    priority: true
+    kitting_task:
+      agv_number: 1
+      tray_id: 1
+      destination: 'warehouse'
+      products:
+        - type: 'sensor'
+          color: 'blue'
+          quadrant: 4
+
+  - id: 'KITTING__2'
+    type: 'kitting'
+    announcement:
+      time_condition: 50
+    priority: true
+    kitting_task:
+      agv_number: 2
+      tray_id: 2
+      destination: 'warehouse'
+      products:
+        - type: 'battery'
+          color: 'red'
+          quadrant: 4
+
+  - id: 'KITTING__3'
+    type: 'kitting'
+    announcement:
+      time_condition: 100
+    priority: true
+    kitting_task:
+      agv_number: 3
+      tray_id: 3
+      destination: 'warehouse'
+      products:
+        - type: 'pump'
+          color: 'green'
+          quadrant: 4
+
+
+  - id: 'KITTING__4'
+    type: 'kitting'
+    announcement:
+      time_condition: 150
+    priority: true
+    kitting_task:
+      agv_number: 4
+      tray_id: 4
+      destination: 'warehouse'
+      products:
+        - type: 'regulator'
+          color: 'purple'
+          quadrant: 4

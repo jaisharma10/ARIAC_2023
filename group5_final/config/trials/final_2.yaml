@@ -1,0 +1,73 @@
+# Trial Name: rwa4.yaml
+
+# ENVIRONMENT SETUP
+
+time_limit: -1 # options: -1 (no time limit) or number of seconds (max 500)
+
+kitting_trays: # Which kitting trays will be spawn
+  tray_ids: [0, 3] 
+  slots: [4, 1]
+
+challenges:
+  - faulty_part:
+      order_id: 'KITTING_2'
+      quadrant3: true
+
+parts:  
+  bins: # bin params - 8 total bins each bin has nine total slots (1-9)
+    bin1:
+      - type: 'battery'
+        color: 'red'
+        slots: [4, 6]
+      - type: 'pump'
+        color: 'purple'
+        slots: [1]
+    bin2:
+      - type: 'pump'
+        color: 'orange'
+        slots: [4, 6]
+    bin5:
+      - type: 'regulator'
+        color: 'green'
+        slots: [4, 6]
+      - type: 'pump'
+        color: 'purple'
+        slots: [1]
+    bin6:
+      - type: 'sensor'
+        color: 'purple'
+        slots: [4, 6]
+
+orders:
+  - id: 'KITTING_1'
+    type: 'kitting'
+    announcement:
+      time_condition: 5
+    priority: false
+    kitting_task:
+      agv_number: 4
+      tray_id: 3
+      destination: 'warehouse'
+      products:
+        - type: 'regulator'
+          color: 'green'
+          quadrant: 1
+        # - type: 'battery'
+        #   color: 'red'
+        #   quadrant: 3
+  # - id: 'KITTING_2'
+  #   type: 'kitting'
+  #   announcement:
+  #     time_condition: 30
+  #   priority: true
+  #   kitting_task:
+  #     agv_number: 2
+  #     tray_id: 0
+  #     destination: 'warehouse'
+  #     products:
+  #       - type: 'sensor'
+  #         color: 'purple'
+  #         quadrant: 1
+  #       - type: 'battery'
+  #         color: 'red'
+  #         quadrant: 3
